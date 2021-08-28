@@ -1,0 +1,15 @@
+局域网主机扫描：
+nmap -sP [网关地址]/24
+
+
+arpspoof中间人攻击
+arpspoof -i [使用的网卡] -r [网关ip] -t [目标主机]
+
+图片嗅探
+driftnet -i [网卡名]
+
+网址嗅探
+urlsnarf -i [网卡名]
+
+
+实验效果不佳。注意有些命令需要sudo和root帐号
