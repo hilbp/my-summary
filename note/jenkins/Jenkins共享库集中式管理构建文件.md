@@ -38,7 +38,8 @@ def path = "${JENKINS_HOME}/jobs/${namespace}/jobs/${JOB_BASE_NAME}/builds/${BUI
 ```groovy
 def jobName = env.JOB_NAME
 def namespace = jobName.split('/')[0]
-def path = "${JENKINS_HOME}/jobs/${namespace}/jobs/${JOB_BASE_NAME}/builds/${BUILD_NUMBER}/libs/jenkins-shared-lib/resources/"
+def jobBaseName = jobName.split('/')[1] 
+def path = "${JENKINS_HOME}/jobs/${namespace}/jobs/${jobBaseName}/builds/${BUILD_NUMBER}/libs/jenkins-shared-lib/resources/"
 
 //resources下文件遍历
 File dir = new File(path)
@@ -46,10 +47,54 @@ File[] files = dir.listFiles()
 for(File item in files) {
     //打印文件名称
     println item.name
+    
+    //使用:读取后写入当前构建项目的devops目录（建议与git库源码的根目录下）
+    def filePath = "${env.WORKSPACE}/{APP_NAME}/devops/"
+    writeFile file: "${filePath}/${item.name}", text: file_contents, encoding: "UTF-8"
+    
 }
 ```
 
 3. 然后在共享库实现中，在适合的步骤中结合以上步骤，完成构建部署文件集中管理的需要。
 
+比如Dockerfile的保存路径是：
+`resources/${APP_NAME}/docker`
 
+其中的文件有：
+- Dockerfile
+- k8s的部署yml
+-   其他需要使用docker ADD/COPY指令拷贝的文件
+
+使用方式:
+
+```groovy
+...
+
+def path = "${JENKINS_HOME}/jobs/${namespace}/jobs/${jobBaseName}/builds/${BUILD_NUMBER}/libs/jenkins-shared-lib/resources/${APP_NAME}/docker/"
+
+//resources下文件遍历
+File dir = new File(path)
+File[] files = dir.listFiles()
+for(File item in files) {
+
+    //打印文件名称
+    println item.name
+    
+    //使用:读取后写入当前构建项目的devops目录（建议与git库源码的根目录下）
+    def filePath = "${env.WORKSPACE}/{APP_NAME}/devops/"
+    writeFile file: "${filePath}/${item.name}", text: libraryResource("${APP_NAME}/docker/${item.name}"), encoding: "UTF-8"
+    
+}
+```
+
+4. Jenkins相关环境变量记录
+
+```groovy
+println "BUILD_DISPLAY_NAME: " + env.BUILD_DISPLAY_NAME
+println "JOB_NAME: " + env.JOB_NAME
+println "JOB_BASE_NAME: " + env.JOB_BASE_NAME
+println "WORKSPACE: " + env.WORKSPACE
+println "WORKSPACE_TMP: " + env.WORKSPACE_TMP
+println "JENKINS_HOME: " + env.JENKINS_HOME
+```
 
